@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+<!--needed for logs for stern-->
+{% block content %}
+
+<div class="container-fluid text-center">
+    <div class="p-5 m-5 row bg-danger-subtle">
+        <div class="row text-center">
+            <h1>Video Stream</h1>
+            <img class="center-block img-fluid" src="{{ url_for('video_feed') }}">
+        </div>
+        <div class="col">
+            <button class="btn btn-primary" onclick=refresh_page() type="button">Replay Video</button>
+        </div>
+    </div>
+    <div class="p-5 row">
+        <div class="col-sm-4 bg-light">
+            <div class="p-5 row">
+                <div class="col-md-12">
+                </div>
+            </div>
+            <div class="p-5 row">
+                <div class="col">
+                </div>
+                <div class="col">
+                </div>
+                <div class="col">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 bg-warning-subtle">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">User</th>
+                        <th scope="col">Command</th>
+                        <th scope="col">Result</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-4 bg-primary-subtle">
+            Something Else
+        </div>
+    </div>
+</div>
+</div>
+<div class="container-sm">
+    <div class="p-5 row">
+        <div class="col">
+        </div>
+        <div class="col">
+            <button class="btn btn-primary" onclick=fetchlogs() type="button">Add Row</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

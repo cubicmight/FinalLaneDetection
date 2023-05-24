@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Hello world</title>
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" rel="stylesheet">
+</head>
+<body>
+<h1>Hello, world!</h1>
+
+<div class="container-fluid text-center">
+    <div class="p-5 m-5 row bg-danger-subtle">
+        <div class="col col-md-auto">
+            Video
+            <img alt="video" src="xxx.jpg">
+        </div>
+    </div>
+    <div class="p-5 row">
+        <div class="col-sm-4 bg-light">
+            <div class="p-5 row">
+                <div class="col-md-12">
+                    <input id="number" max="500" min="0" name="number" type="number"></input>
+                </div>
+            </div>
+            <div class="p-5 row">
+                <div class="col">
+                    <button class="btn btn-primary" type="button">Forward</button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-primary" type="button">Back</button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-primary" type="button">Left</button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-primary" type="button">Right</button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-primary" type="button">Special</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 bg-warning-subtle">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">User</th>
+                    <th scope="col">Command</th>
+                    <th scope="col">Result</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-4 bg-primary-subtle">
+            Something Else
+        </div>
+    </div>
+</div>
+</div>
+<div class="container-sm">
+    <div class="p-5 row">
+        <div class="col">
+        </div>
+        <div class="col">
+            <button class="btn btn-primary" onclick=addRow() type="button">Add Row</button>
+        </div>
+        <div class="col">
+        </div>
+    </div>
+</div>
+<script>
+    let count = 0;
+    let color = ['table-primary', 'table-secondary', 'table-success', 'table-danger', 'table-warning', 'table-info', 'table-light', 'table-dark'];
+    let rowCount = color.length;
+
+    let previousCount = 0;
+
+    function addRow() {
+        fetch('/log')
+            .then((response) => response.json())
+            .then((data) => {
+                for (let i = previousCount; i < data.length; i++) {
+                    let current = color[count % rowCount];
+                    count = count + 1;
+
+                    let row = document.createElement("tr");
+                    row.className = current;
+                    let head = document.createElement("th");
+                    head.scope = "row";
+                    head.innerHTML = "JS Add";
+                    let col1 = document.createElement("td");
+                    col1.innerHTML = data[i];
+                    let col2 = document.createElement("td");
+                    col2.innerHTML = data[i];
+
+                    row.appendChild(head);
+                    row.appendChild(col1);
+                    row.appendChild(col2);
+
+                    document.querySelector('.table > tbody').append(row);
+                }
+                previousCount = data.length;
+            });
+    }
+</script>
+
+<script crossorigin="anonymous"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
