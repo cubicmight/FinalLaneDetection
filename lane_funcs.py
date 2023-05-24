@@ -1,6 +1,8 @@
 # Import libraries
 import math  # For math functions
 import time  # For timer to calculate fps
+
+import cvzone
 import numpy as np  # For array operations
 import cv2  # For video/image processing
 
@@ -350,10 +352,9 @@ def process_frame(frame):
     w, h = template.shape[::-1]
     # Perform match operations.
     res_left = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-    if res_left is not None:
-        print("left")
+    cvzone.rotateImage('')
     # Specify a threshold
-    threshold = 0.5
+    threshold = 0.8
     # Store the coordinates of matched area in a numpy array
     loc = np.where(res_left >= threshold)
     # Draw a rectangle around the matched region.
@@ -362,7 +363,7 @@ def process_frame(frame):
     # Convert it to grayscale
     img_gray = cv2.cvtColor(final_frame, cv2.COLOR_BGR2GRAY)
     # Read the template
-    template = cv2.imread('test_images/img_7.png', 0)
+    template = cv2.imread('test_images/Screen Shot 2023-05-24 at 8.04.54 AM.png', 0)
     # Store width and height of template in w and h
     w, h = template.shape[::-1]
     # Perform match operations.
@@ -370,7 +371,7 @@ def process_frame(frame):
     if res_right is not None:
         print("right")
     # Specify a threshold
-    threshold = 0.5
+    threshold = 0.8
     # Store the coordinates of matched area in a numpy array
     loc = np.where(res_right >= threshold)
     # Draw a rectangle around the matched region.

@@ -124,7 +124,7 @@ def gen_frame():
     if not camera:
         basedir = os.path.abspath(os.path.dirname(__file__))
 
-        image_file_name = "../videos/turning-test/perfect right turn.mp4"
+        image_file_name = "../videos/IMG_8417.mp4"
         full_image_path = os.path.join(basedir, image_file_name)
         if not os.path.exists(full_image_path):
             print("cannot find image")
