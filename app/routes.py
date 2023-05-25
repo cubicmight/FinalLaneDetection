@@ -16,11 +16,18 @@ import math
 import cv2      # For video/image processing
 from moviepy.editor import VideoFileClip    # For image recording and saving
 from lane_funcs import process_frame, arrow_detection_left, arrow_detection_right, region_of_interest
+from threading import Timer
 
 
 
 current_direction_image = None
 camera = None
+rotated_left = False
+rotated_right = False
+done_turn_left = False
+done_turn_right = False
+
+
 
 with app.app_context():
     UserLogData.query.delete()
@@ -118,13 +125,26 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+
+def normal_left():
+    global current_direction_image
+    current_direction_image = cvzone.rotateImage(current_direction_image, 270)
+
+
+def normal_right():
+    global current_direction_image
+    current_direction_image = cvzone.rotateImage(current_direction_image, 90)
 def gen_frame():
     """Video streaming generator function."""
     global camera
+    global rotated_right
+    global rotated_left
+    global done_turn_left
+    global done_turn_right
     if not camera:
         basedir = os.path.abspath(os.path.dirname(__file__))
 
-        image_file_name = "../videos/IMG_8417.mp4"
+        image_file_name = "../videos/final_vid.mp4"
         full_image_path = os.path.join(basedir, image_file_name)
         if not os.path.exists(full_image_path):
             print("cannot find image")
@@ -139,7 +159,59 @@ def gen_frame():
         (grabbed, frame) = cap.read()
         if grabbed:
             global current_direction_image
-            imgResult = cvzone.overlayPNG(process_frame(frame), current_direction_image, (900, 400))#1250, 660
+            processed_frame = process_frame(frame)
+            # Convert it to grayscale
+            img_gray = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2GRAY)
+            # Read the template
+            template = cv2.imread('test_images/img_12.png', 0)
+            # Store width and height of template in w and h
+            w, h = template.shape[::-1]
+            # Perform match operations.
+            res_left = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
+            # Specify a threshold
+            threshold = 0.8
+            # Store the coordinates of matched area in a numpy array
+            loc = np.where(res_left >= threshold)
+            # Draw a rectangle around the matched region.
+            for pt in zip(*loc[::-1]):
+                if not rotated_left:
+                    current_direction_image = cvzone.rotateImage(current_direction_image, 90)
+                    rotated_left = True
+                    t = Timer(75.0, normal_left)
+                    t.start()
+                print('first left loop')
+                cv2.rectangle(processed_frame, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
+                break
+            imgResult = cvzone.overlayPNG(processed_frame, current_direction_image, (1250, 600))  # 1250, 660
+            for pt in zip(*loc[::-1]):
+                print("left")
+                cv2.rectangle(imgResult, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
+            # Convert it to grayscale
+            img_gray = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2GRAY)
+            # Read the template
+            template = cv2.imread('test_images/Screen Shot 2023-05-24 at 8.04.54 AM.png', 0)
+            # Store width and height of template in w and h
+            w, h = template.shape[::-1]
+            # Perform match operations.
+            res_right = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
+            # Specify a threshold
+            threshold = 0.8
+            # Store the coordinates of matched area in a numpy array
+            loc = np.where(res_right >= threshold)
+            # Draw a rectangle around the matched region.
+            for pt in zip(*loc[::-1]):
+                if not rotated_right:
+                    current_direction_image = cvzone.rotateImage(current_direction_image, 270)
+                    rotated_right = True
+                    t = Timer(110.0, normal_right)
+                    t.start()
+                print('first right loop')
+                cv2.rectangle(processed_frame, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
+                break
+            imgResult = cvzone.overlayPNG(processed_frame, current_direction_image, (1250, 600))  # 1250, 660
+            for pt in zip(*loc[::-1]):
+                print("right")
+                cv2.rectangle(imgResult, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
             ret, buffer = cv2.imencode('.jpg', imgResult)
             if ret:
                 convert = buffer.tobytes()

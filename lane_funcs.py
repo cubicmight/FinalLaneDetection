@@ -1,5 +1,6 @@
 # Import libraries
 import math  # For math functions
+import os
 import time  # For timer to calculate fps
 
 import cvzone
@@ -8,6 +9,7 @@ import cv2  # For video/image processing
 
 from lane_vars import *
 import matplotlib.pyplot as plt
+
 
 
 def denoise_frame(frame):
@@ -243,9 +245,9 @@ def get_floating_center(frame, lane_lines):
         right_x1, _, right_x2, _ = lane_lines[1][0]  # Unpacking right line
         if len(memory_low_mid) < 5 and len(memory_up_mid) < 5:  # Adding memory feature
             low_mid = (
-                                  right_x1 + left_x1) / 2  # Here we calculate the relative position of the lower middle point of roi
+                              right_x1 + left_x1) / 2  # Here we calculate the relative position of the lower middle point of roi
             up_mid = (
-                                 left_x2 + right_x2) / 2  # Here we calculate the relative position of the upper middle point of roi
+                             left_x2 + right_x2) / 2  # Here we calculate the relative position of the upper middle point of roi
 
             memory_up_mid.append(up_mid)  # Saving upper mid point
             memory_low_mid.append(low_mid)  # Saving lower mid point
@@ -262,7 +264,7 @@ def get_floating_center(frame, lane_lines):
 
             low_mid -= dx1  # Substact delta from the actual lower mid point
             dx2 = dx1 * (right_x2 - left_x2) / (
-                        right_x1 - left_x1)  # Find delta for the upper mid point using the relative ratio
+                    right_x1 - left_x1)  # Find delta for the upper mid point using the relative ratio
             up_mid = (left_x2 + right_x2) / 2 - dx2 * 2  # Find new upper mid point
 
             memory_up_mid.append(up_mid)  # Append to the queue new upper mid point
@@ -270,8 +272,6 @@ def get_floating_center(frame, lane_lines):
     else:  # Handling undetected lines
         up_mid = 0
         low_mid = int(width * 1.9)
-
-
 
     avg_up_mid = sum(memory_up_mid) / len(memory_up_mid)
 
@@ -314,14 +314,19 @@ def add_text(frame, image_center, left_x_base, right_x_base):
     return frame  # Retrun frame with the direction on it
 
 
+
+
+
 def process_frame(frame):
     """ Main orchestrator that defines
     whole process of program execution"""
 
     # Declaring global variable for fps for function use
+    current_direction_image = cv2.imread('app/static/direction_arrow.png', cv2.IMREAD_UNCHANGED)
     global avg_fps
     global fps_list
-
+    os.environ['LEFT_TURN_FLAG'] = "1"
+    os.environ['RIGHT_TURN_FLAG'] = "1"
     start_time = time.time()  # Start the timer
 
     edges = detect_edges(frame)
@@ -343,40 +348,6 @@ def process_frame(frame):
     heading_line = display_heading_line(lane_lines_image, up_center, low_center)
 
     final_frame = add_text(heading_line, low_center, left_x_base, right_x_base)  # Predict and draw turn
-
-    # Convert it to grayscale
-    img_gray = cv2.cvtColor(final_frame, cv2.COLOR_BGR2GRAY)
-    # Read the template
-    template = cv2.imread('test_images/img_6.png', 0)
-    # Store width and height of template in w and h
-    w, h = template.shape[::-1]
-    # Perform match operations.
-    res_left = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-    cvzone.rotateImage('')
-    # Specify a threshold
-    threshold = 0.8
-    # Store the coordinates of matched area in a numpy array
-    loc = np.where(res_left >= threshold)
-    # Draw a rectangle around the matched region.
-    for pt in zip(*loc[::-1]):
-        cv2.rectangle(final_frame, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
-    # Convert it to grayscale
-    img_gray = cv2.cvtColor(final_frame, cv2.COLOR_BGR2GRAY)
-    # Read the template
-    template = cv2.imread('test_images/Screen Shot 2023-05-24 at 8.04.54 AM.png', 0)
-    # Store width and height of template in w and h
-    w, h = template.shape[::-1]
-    # Perform match operations.
-    res_right = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-    if res_right is not None:
-        print("right")
-    # Specify a threshold
-    threshold = 0.8
-    # Store the coordinates of matched area in a numpy array
-    loc = np.where(res_right >= threshold)
-    # Draw a rectangle around the matched region.
-    for pt in zip(*loc[::-1]):
-        cv2.rectangle(final_frame, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
     fps = round(1.0 / (time.time() - start_time), 1)  # Here we calculate the fps
     fps_list.append(fps)  # Append fps to fps list
     cv2.putText(final_frame, "FPS: " + str(fps), (50, 100), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 0, 0), 2,
@@ -413,6 +384,7 @@ def arrow_detection_left(frame, template_image):
     # Show the final image with the matched area.
     return img_rgb_left
 
+
 def arrow_detection_right(frame, template_image):
     global threshold
     # Read the main image
@@ -434,4 +406,3 @@ def arrow_detection_right(frame, template_image):
         cv2.rectangle(img_rgb_right, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
     # Show the final image with the matched area.
     return img_rgb_right
-
